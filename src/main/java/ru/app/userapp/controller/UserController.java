@@ -1,12 +1,26 @@
-package ru.app.userapp.dao;
+package ru.app.userapp.controller;
 
 import ru.app.userapp.exception.ApplicationException;
+import ru.app.userapp.exception.ValidationException;
 import ru.app.userapp.model.User;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
 
-public interface UserDao {
+public interface UserController {
+    /**
+     * Creates new user
+     *
+     * @param userName user name
+     * @param citiesLived cities where user has lived
+     * @param citiesWorked cities where user has worked
+     * @return user id
+     * @throws ValidationException in case of input parameters validation failures
+     */
+    long createUser(String userName, Set<String> citiesLived, Set<String> citiesWorked) throws ValidationException;
+
     void getAllUsers() throws SQLException; // получить всех юзеров из базы
     void getAllCities() throws SQLException; // получить все города из базы
 
@@ -18,7 +32,6 @@ public interface UserDao {
     void getAllUserByCityWorked(String cityName) throws SQLException; // получить всех юзеров которые работали в городе N
     void getAllCityWhereUserWorked(String userName) throws SQLException; // получить все города где работал юзер N
 
-    Long createUser(User user) throws ApplicationException; // создать нового юзера
     void updateUserByName(String userName) throws SQLException, IOException; // обновить данные юзера (должен включать еще два метода - добавить где жил, работал)
     void deleteUserByName(String userName) throws SQLException; // удалить юзера по имени
 

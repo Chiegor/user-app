@@ -1,16 +1,55 @@
 package ru.app.userapp.model;
 
-public class User {
-    private String name;
-    private String cityLived;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
-    public User(String name, String cityWhereLived) {
-        this.name = name;
-        this.cityLived = cityWhereLived;
+public class User {
+    public static final int MIN_USER_NAME_LENGTH = 1;
+    public static final int MAX_USER_NAME_LENGTH = 64;
+    public static final int MIN_CITY_NAME_LENGTH = 1;
+    public static final int MAX_CITY_NAME_LENGTH = 64;
+
+    private final Long id;
+    private final String name;
+    private final Set<String> citiesLived;
+    private final Set<String> citiesWorked;
+
+    public User(String name, Set<String> citiesLived, Set<String> citiesWorked) {
+        this(null, name, citiesLived, citiesWorked);
+    }
+
+    public User(Long id, String name, Set<String> citiesLived, Set<String> citiesWorked) {
+        this.id = id;
+        this.name = Objects.requireNonNull(name);
+        this.citiesLived = Objects.requireNonNull(citiesLived);
+        this.citiesWorked = Objects.requireNonNull(citiesWorked);
+    }
+
+    // чтобы избежать null
+    public Optional<Long> getId() {
+        return Optional.ofNullable(id);
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
+    public Set<String> getCitiesLived() {
+        return citiesLived;
+    }
+
+    public Set<String> getCitiesWorked() {
+        return citiesWorked;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", citiesLived=" + citiesLived +
+                ", citiesWorked=" + citiesWorked +
+                '}';
+    }
 }

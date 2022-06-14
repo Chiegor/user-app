@@ -1,14 +1,13 @@
 package ru.app.userapp;
 
-import ru.app.userapp.controller.Controller;
-import ru.app.userapp.dao.UserDaoImpl;
+import ru.app.userapp.ui.ConsoleUserInterface;
 
 import java.sql.SQLException;
 
 public class App {
 
     public static void main(String[] args) throws SQLException {
-        Controller session = new Controller();
+        ConsoleUserInterface session = new ConsoleUserInterface();
         session.start();
     }
 }

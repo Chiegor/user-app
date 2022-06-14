@@ -1,15 +1,17 @@
 package ru.app.userapp.service;
 
 import ru.app.userapp.dao.UserDaoImpl;
+import ru.app.userapp.model.User;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Objects;
 
-public class Service implements UserService {
-    UserDaoImpl udl;
+public class UserServiceImpl implements UserService {
+    UserDaoImpl udl = new UserDaoImpl();
 
-    public Service() throws SQLException {
-        this.udl = new UserDaoImpl();
+    public UserServiceImpl() throws SQLException {
+        this.udl = Objects.requireNonNull(udl, "UserServiceImpl must be provided");
     }
 
     @Override
@@ -28,8 +30,8 @@ public class Service implements UserService {
     }
 
     @Override
-    public void getAllUserFromCityLived(String cityName) throws SQLException {
-        udl.getAllUserFromCityLived(cityName);
+    public void getAllUserByCityLived(String cityName) throws SQLException {
+        udl.getAllUserByCityLived(cityName);
     }
 
     @Override
@@ -38,8 +40,8 @@ public class Service implements UserService {
     }
 
     @Override
-    public void getAllUserFromCityWorked(String cityName) throws SQLException {
-        udl.getAllUserFromCityWorked(cityName);
+    public void getAllUserByCityWorked(String cityName) throws SQLException {
+        udl.getAllUserByCityWorked(cityName);
     }
 
     @Override
@@ -48,8 +50,9 @@ public class Service implements UserService {
     }
 
     @Override
-    public void createUser(String userName, String cityLived) throws SQLException {
-        udl.createUser(userName, cityLived);
+    public Long createUser(User user) throws SQLException {
+        return udl.createUser(user);
+
     }
 
     @Override
