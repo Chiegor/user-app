@@ -2,44 +2,45 @@
 
 Commands:
 
-1 - create
-2 - get
-3 - getall
-4 - update
-5 - delete
-6 - select
-7 - size
-8 - save
-9 - help
-
+1 - get all user from user's list
+2 - get all city from city's list
+3 - get all city where user lived
+4 - get all city where user worked
+5 - create new user and add it to the users list. Return user's ID
+6 - Get user id by user name
+7 - update - update user by user name or user id
+8 - delete - delete user by user name or user id
+9 - get all user by city lived
+10 - get all user by city worked
+h - help - get list of command
 
 SQL
 
 SCHEMAS
 
 User:
--userID
+-userId
 -userName
 
 City:
--cityID
+-cityId
 -cityName
 
 UCL: // where users lived
 -n
--userID
--cityID
+-userId
+-cityId
 
 UCW: // where users worked
 -n
--userID
--cityID
+-userId
+-cityId
 
-User.userID == UCL.userID
-City.cityID == UCL.cityID
+User.userId == UCL.userId
+City.cityId == UCL.cityId
 
-User.userID == UCW.userID
-City.cityID == UCW.cityID
+User.userId == UCW.userId
+City.cityId == UCW.cityId
 
 
 
