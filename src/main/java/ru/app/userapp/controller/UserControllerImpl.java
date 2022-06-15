@@ -64,27 +64,28 @@ public class UserControllerImpl implements UserController {
         return userService.getUserIdByName(userName);
     }
 
-
-
     // В РАБОТЕ
     @Override
     public void getAllUserByCityLived(String cityName) throws SQLException {
         validate(cityName, this::validateCityName,
                 "invalid city name length. City name length must be [1-64]");
-        userService.getAllUserByCityLived(cityName);
+        if (validateCityInDB(cityName)) {
+            userService.getAllUserByCityLived(cityName);
+        } else {
+            throw new ApplicationException("City not found");
+        }
     }
 
     @Override
     public void getAllUserByCityWorked(String cityName) throws SQLException {
         validate(cityName, this::validateCityName,
                 "invalid city name length. City name length must be [1-64]");
-        userService.getAllUserByCityWorked(cityName);
+        if (validateCityInDB(cityName)) {
+            userService.getAllUserByCityWorked(cityName);
+        } else {
+            throw new ApplicationException("City not found");
+        }
     }
-
-
-
-
-
 
     @Override
     public void getAllCityWhereUserLived(String userName) throws SQLException {
@@ -163,7 +164,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public boolean validateCityInDB(String cityName) throws SQLException {
-        return false;
+        return userService.validateCityInDB(cityName);
     }
 }
 

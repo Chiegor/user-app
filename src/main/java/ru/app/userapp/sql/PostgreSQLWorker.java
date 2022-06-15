@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class PostgreSQLWorker {
+public class PostgreSQLWorker { // ВОЗМОЖНОСТЬ РАБОТАТЬ С БАЗОЙ POSTGRESQL. СЕЙЧАС НЕ ПОДКЛЮЧЕНА
 
     private final String HOST = "jdbc:postgresql://localhost:5432/java_ee_db";
     private final String USERNAME = "egorcicerin";

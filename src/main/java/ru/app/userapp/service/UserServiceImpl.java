@@ -104,7 +104,6 @@ public class UserServiceImpl implements UserService {
         while (!(cityName = reader.readLine()).equals("done")) {
             setCity.add(cityName);
         }
-
         udl.addCityWhereUserLived(userId, setCity);
     }
 
@@ -114,11 +113,10 @@ public class UserServiceImpl implements UserService {
         System.out.println("Enter 'done' when end");
         Set<String> setCity = new HashSet<>();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            String cityName;
-            while (!(cityName = reader.readLine()).equals("done")) {
-                setCity.add(cityName);
-            }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String cityName;
+        while (!(cityName = reader.readLine()).equals("done")) {
+            setCity.add(cityName);
         }
         udl.addCityWhereUserWorked(userId, setCity);
     }
@@ -134,6 +132,7 @@ public class UserServiceImpl implements UserService {
         udl.deleteUser(id);
     }
 
+    // есть ли такой юзер в таблице User
     @Override
     public boolean validateUserInDB(String userName) throws SQLException {
         if (getUserIdByName(userName) == 0L) {
@@ -141,8 +140,14 @@ public class UserServiceImpl implements UserService {
         } else return true;
     }
 
+    // есть ли город в таблице City
     @Override
     public boolean validateCityInDB(String cityName) throws SQLException {
-        return false;
+        long cityId = udl.getCityId(cityName);
+        if (cityId == 0L) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

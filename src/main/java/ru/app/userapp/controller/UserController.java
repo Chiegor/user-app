@@ -21,21 +21,21 @@ public interface UserController {
      */
     long createUser(String userName, Set<String> citiesLived, Set<String> citiesWorked) throws ValidationException;
 
-    void getAllUsers() throws SQLException; // получить всех юзеров из базы
-    void getAllCities() throws SQLException; // получить все города из базы
+    void getAllUsers() throws SQLException;
+    void getAllCities() throws SQLException;
 
-    Long getUserIdByName(String userName) throws SQLException; // получить юзера по имени (города где жил, работал)
+    Long getUserIdByName(String userName) throws SQLException;
 
-    void getAllUserByCityLived(String cityName) throws SQLException; // получить всех юзеров которые жили в городе N
-    void getAllCityWhereUserLived(String userName) throws SQLException; // получить все города где жил юзер N
+    void getAllUserByCityLived(String cityName) throws SQLException;
+    void getAllCityWhereUserLived(String userName) throws SQLException;
 
-    void getAllUserByCityWorked(String cityName) throws SQLException; // получить всех юзеров которые работали в городе N
-    void getAllCityWhereUserWorked(String userName) throws SQLException; // получить все города где работал юзер N
+    void getAllUserByCityWorked(String cityName) throws SQLException;
+    void getAllCityWhereUserWorked(String userName) throws SQLException;
 
     void updateByUserId(long userId) throws SQLException, IOException;
     void updateByUserName(String userName) throws SQLException, IOException;
 
-    void deleteUserByName(String userName) throws SQLException; // удалить юзера по имени
+    void deleteUserByName(String userName) throws SQLException;
     void deleteUserById(long id) throws SQLException;
 
     boolean validateUserInDB(String userName) throws SQLException;
