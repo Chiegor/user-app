@@ -32,116 +32,191 @@ public class UserDaoImpl implements UserDao {
         log.info("db connection created");
 
     }
-
+    // #1
+    @Override
     public void getAllUsers() throws SQLException {
-        String query = "select * from User";
+        String query = "select * from User order by userId";
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
-            System.out.println(resultSet.getString("userName"));
+            System.out.println(resultSet.getString("userId") + " " + resultSet.getString("userName"));
         }
     }
 
+    // #2
+    @Override
     public void getAllCities() throws SQLException {
-        String query = "select * from City";
+        String query = "select * from City order by cityId";
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
-            System.out.println(resultSet.getString("cityName"));
+            System.out.println(resultSet.getString("cityId") + " " + resultSet.getString("cityName"));
         }
     }
 
-    // задваивает значения
+    // #3
+    @Override
     public void getAllCityWhereUserLived(String userName) throws SQLException {
-        String query = "select User.userName," +
-                "City.cityName " +
-                "from User, City, UCL " +
-                "where User.userID = UCL.userID " +
-                "and User.userName = '" + userName + "'"; // почитать про PreparedStatement
+        String query = "select distinct City.cityName " +
+                "from User " +
+                "join UCL " +
+                "on User.userId = UCL.userId " +
+                "and User.userName = '" + userName + "' " +
+                "join City " +
+                "on City.cityId = UCL.cityId";
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
 
         while (resultSet.next()) {
-            System.out.println(resultSet.getString("User.userName") + " " +
-                    resultSet.getString("City.cityName"));
+            System.out.println(resultSet.getString("City.cityName"));
         }
     }
-
+    // #4
     @Override
     public void getAllCityWhereUserWorked(String userName) throws SQLException {
-        String query = "select User.userName," +
-                "City.cityName " +
-                "from User, City, UCW " +
-                "where User.userName = '" + userName + "'" +
-                "and User.userID = UCW.userID"; // почитать про PreparedStatement
+        String query = "select distinct City.cityName " +
+                "from User " +
+                "join UCW " +
+                "on User.userId = UCW.userId " +
+                "and User.userName = '" + userName + "' " +
+                "join City " +
+                "on City.cityId = UCW.cityId";
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
-            System.out.println(resultSet.getString("User.userName") + " " +
-                    resultSet.getString("City.cityName"));
+            System.out.println(resultSet.getString("City.cityName"));
         }
     }
+
+    // #5
     @Override
     public Long createUser(User user) throws ApplicationException {
+        String userName = user.getName();
+        Set<String> cityLived = user.getCitiesLived();
+        Set<String> cityWorked = user.getCitiesWorked();
+        long userId;
+        
         try {
-
-            String userName = user.getName();
-            Set<String> cityLived = user.getCitiesLived();
-            Set<String> cityWorked = user.getCitiesWorked();
-
-//            String query = "INSERT INTO User (userName) Values (?)";
             String query = "INSERT INTO User (userName) Values ('" + userName + "')";
             PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
             log.debug("creating new user {}", user);
 
             int affectedRows = statement.executeUpdate();
-
-            if (affectedRows == 0) {
-                throw new ApplicationException("Creating user failed, no rows affected.");
-            }
+            if (affectedRows == 0) {throw new ApplicationException("Creating user failed, no rows affected.");}
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    long id = generatedKeys.getLong(1);
-
-                    log.debug("created user id=" + id);
-                    System.out.println("User id is: " + id);
-                    return id;
+                    userId = generatedKeys.getLong(1);
+                    log.debug("created user id=" + userId);
+                    System.out.println("User id is: " + userId);
                 } else {
                     throw new ApplicationException("Creating user failed, no ID obtained.");
                 }
             }
+
+            for (String city : cityLived) {
+                long cityId = getCityId(city);
+                if (cityId != 0L) {
+                    putCityIdUserIdInTable(userId, cityId, "UCL");
+                    System.out.println("put: " + userId + " " + cityId + " to UCL");
+                } else {
+                    long cityID = addCityToTable(city);
+                    putCityIdUserIdInTable(userId, cityID, "UCL");
+                    System.out.println("add city " + city + " to the City table");
+                }
+            }
+
+            for (String city : cityWorked) {
+                long cityId = getCityId(city);
+                if (cityId != 0L) {
+                    putCityIdUserIdInTable(userId, cityId, "UCW");
+                    System.out.println("put: " + userId + " " + cityId + " to UCW");
+                } else {
+                    long cityID = addCityToTable(city);
+                    putCityIdUserIdInTable(userId, cityID, "UCW");
+                    System.out.println("add city " + city + " to the City table");
+                }
+            }
+
         } catch (SQLException e){
             throw new ApplicationException("error creating user in db", e);
         }
+        return userId;
 
+
+
+    }
+    @Override
+    public void putCityIdUserIdInTable(long userId, long cityId, String tableName) throws SQLException {
+        String query = "insert into " + tableName + " (" +
+                "userId, cityId) " +
+                "values (" + userId + ", " + cityId + ")";
+        PreparedStatement statement = connection.prepareStatement(query);
+        int affectedRows = statement.executeUpdate();
+        if (affectedRows == 0) {throw new ApplicationException("putCityIdUserIdInTable error");}
     }
 
     @Override
-    public void updateUserByName(String userName) throws SQLException, IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            String request = reader.readLine();
-            System.out.println("Press 'l' if you want to add city where user lived");
-            System.out.println("Press 'w' if you want to add city where user worked");
+    public Long getCityId(String cityName) throws SQLException {
+        Long cityId = 0L;
+        String query = "select * from City";
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query);
 
-            if (request.equals("l")){
-                System.out.println("User name is " + userName);
-                System.out.println("Enter city name: ");
-                String city = reader.readLine();
-                addCityWhereUserLived(userName, city);
+        while (resultSet.next()) {
+            String compare = resultSet.getString("cityName");
+            if (compare.equals(cityName)) {
+                cityId = resultSet.getLong("cityId");
+                return cityId;
+            }
+        }
+        return addCityToTable(cityName);
+    }
+
+
+
+    @Override
+    public Long addCityToTable(String cityName) throws SQLException {
+        Long cityId;
+        String query = "insert into City (cityName) " +
+                "values ('" + cityName + "')";
+        PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+        int affectedRows = statement.executeUpdate();
+        if (affectedRows == 0) {throw new ApplicationException("Add city to table failed, no rows affected.");}
+
+        try (ResultSet generatedKey = statement.getGeneratedKeys()) {
+            if (generatedKey.next()) {
+                cityId = generatedKey.getLong(1);
+                log.debug("add city id=" + cityId);
+                System.out.println("City id is: " + cityId);
+                return cityId;
             } else {
-                System.out.println("User name is " + userName);
-                System.out.println("Enter city name: ");
-                String city = reader.readLine();
-                addCityWhereUserWorked(userName, city);
+                throw new ApplicationException("Add city failed, no city ID obtained.");
             }
         }
     }
 
     @Override
-    public void getUserByName(String userName) throws SQLException {
+    public Long getUserIdByName(String userName) throws SQLException {
+        Long id = 0L;
+        String query = "select userId from User where userName = '" + userName + "'";
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query);
 
+        while (resultSet.next()) {
+            id = resultSet.getLong("User.userId");
+        }
+
+        if (id == 0L) {
+            System.out.println("User " + userName + " not found ");
+            System.exit(123);
+            return null;
+        } else {
+            System.out.println("User " + userName + " id is: " + id);
+            return id;
+        }
     }
 
     @Override
@@ -160,13 +235,22 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void addCityWhereUserLived(String userName, String cityName) throws SQLException {
-
+    public void addCityWhereUserLived(long userId, Set<String> cityLived) throws SQLException {
+        String tableName = "UCL";
+        long cityId;
+        for (String string : cityLived) {
+            cityId = getCityId(string);
+            putCityIdUserIdInTable(userId, cityId, tableName);
+        }
     }
 
     @Override
-    public void addCityWhereUserWorked(String userName, String cityName) throws SQLException {
-
+    public void addCityWhereUserWorked(long userId, Set<String> cityWorked) throws SQLException {
+        String tableName = "UCW";
+        long cityId;
+        for (String string : cityWorked) {
+            cityId = getCityId(string);
+            putCityIdUserIdInTable(userId, cityId, tableName);
+        }
     }
-
 }

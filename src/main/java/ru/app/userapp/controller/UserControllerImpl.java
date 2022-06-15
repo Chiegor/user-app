@@ -3,6 +3,7 @@ package ru.app.userapp.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.app.userapp.dao.UserDaoImpl;
+import ru.app.userapp.exception.ApplicationException;
 import ru.app.userapp.exception.ValidationException;
 import ru.app.userapp.model.User;
 import ru.app.userapp.service.UserService;
@@ -29,7 +30,7 @@ public class UserControllerImpl implements UserController {
         validate(userName, this::validateUserName,
                 "invalid user name length. User name length must be [1-64]");
 
-        validate(citiesLived, this::validateCityLived,
+        validate(citiesLived, citiesLived1 -> validateCityLived(citiesLived1),
                 "invalid list of cities where user lived. " +
                         "List should have at least one city, city name length must be [1-64]");
 
@@ -50,57 +51,64 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public void getAllUsers() throws SQLException {
-
+        userService.getAllUsers();
     }
 
     @Override
     public void getAllCities() throws SQLException {
-
+        userService.getAllCities();
     }
 
     @Override
-    public void getUserByName(String userName) throws SQLException {
-
+    public Long getUserIdByName(String userName) throws SQLException {
+        return userService.getUserIdByName(userName);
     }
 
     @Override
     public void getAllUserByCityLived(String cityName) throws SQLException {
-
+        userService.getAllUserByCityLived(cityName);
     }
 
     @Override
     public void getAllCityWhereUserLived(String userName) throws SQLException {
-
+        validate(userName, this::validateUserName,
+                "invalid user name length. User name length must be [1-64]");
+        if (validateUserInDB(userName)) {
+            userService.getAllCityWhereUserLived(userName);
+        }
     }
 
     @Override
     public void getAllUserByCityWorked(String cityName) throws SQLException {
-
+        userService.getAllUserByCityWorked(cityName);
     }
 
     @Override
     public void getAllCityWhereUserWorked(String userName) throws SQLException {
-
+        validate(userName, this::validateUserName,
+                "invalid user name length. User name length must be [1-64]");
+        if (validateUserInDB(userName)) {
+            userService.getAllCityWhereUserWorked(userName);
+        }
     }
 
     @Override
-    public void updateUserByName(String userName) throws SQLException, IOException {
+    public void updateByUserId(long userId) throws SQLException, IOException {
+        userService.updateByUserId(userId);
+    }
 
+    @Override
+    public void updateByUserName(String userName) throws SQLException, IOException {
+        validate(userName, this::validateUserName,
+                "invalid user name length. User name length must be [1-64]");
+        userService.updateByUserName(userName);
     }
 
     @Override
     public void deleteUserByName(String userName) throws SQLException {
-
-    }
-
-    @Override
-    public void addCityWhereUserLived(String userName, String cityName) throws SQLException {
-
-    }
-
-    @Override
-    public void addCityWhereUserWorked(String userName, String cityName) throws SQLException {
-
+        validate(userName, this::validateUserName,
+                "invalid user name length. User name length must be [1-64]");
+        userService.deleteUserByName(userName);
     }
 
     private boolean validateCityName(String cityName) {
@@ -128,7 +136,10 @@ public class UserControllerImpl implements UserController {
             throw new ValidationException(errorMessage);
         }
     }
-
+    @Override
+    public boolean validateUserInDB(String userName) throws SQLException {
+        return userService.validateUserInDB(userName);
+    }
 
 }
 
