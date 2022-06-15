@@ -21,6 +21,7 @@ public interface UserService {
     Long createUser(User user) throws SQLException; // создать нового юзера
 //    void updateUser(String userName) throws SQLException, IOException; // обновить данные юзера (должен включать еще два метода - добавить где жил, работал)
     void deleteUserByName(String userName) throws SQLException; // удалить юзера по имени
+    void deleteUserById(long id) throws SQLException;
 
     void updateByUserId(long userId) throws SQLException, IOException;
     void updateByUserName(String userName) throws SQLException, IOException;
@@ -29,5 +30,6 @@ public interface UserService {
     void addCityWhereUserWorked(long userId) throws SQLException, IOException;
 
     boolean validateUserInDB(String userName) throws SQLException;
+    boolean validateCityInDB(String cityName) throws SQLException;
 
 }

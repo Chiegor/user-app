@@ -64,10 +64,27 @@ public class UserControllerImpl implements UserController {
         return userService.getUserIdByName(userName);
     }
 
+
+
+    // В РАБОТЕ
     @Override
     public void getAllUserByCityLived(String cityName) throws SQLException {
+        validate(cityName, this::validateCityName,
+                "invalid city name length. City name length must be [1-64]");
         userService.getAllUserByCityLived(cityName);
     }
+
+    @Override
+    public void getAllUserByCityWorked(String cityName) throws SQLException {
+        validate(cityName, this::validateCityName,
+                "invalid city name length. City name length must be [1-64]");
+        userService.getAllUserByCityWorked(cityName);
+    }
+
+
+
+
+
 
     @Override
     public void getAllCityWhereUserLived(String userName) throws SQLException {
@@ -76,11 +93,6 @@ public class UserControllerImpl implements UserController {
         if (validateUserInDB(userName)) {
             userService.getAllCityWhereUserLived(userName);
         }
-    }
-
-    @Override
-    public void getAllUserByCityWorked(String cityName) throws SQLException {
-        userService.getAllUserByCityWorked(cityName);
     }
 
     @Override
@@ -108,7 +120,14 @@ public class UserControllerImpl implements UserController {
     public void deleteUserByName(String userName) throws SQLException {
         validate(userName, this::validateUserName,
                 "invalid user name length. User name length must be [1-64]");
-        userService.deleteUserByName(userName);
+        if (validateUserInDB(userName)) {
+            userService.deleteUserByName(userName);
+        }
+    }
+
+    @Override
+    public void deleteUserById(long id) throws SQLException {
+        userService.deleteUserById(id);
     }
 
     private boolean validateCityName(String cityName) {
@@ -136,10 +155,15 @@ public class UserControllerImpl implements UserController {
             throw new ValidationException(errorMessage);
         }
     }
+
     @Override
     public boolean validateUserInDB(String userName) throws SQLException {
         return userService.validateUserInDB(userName);
     }
 
+    @Override
+    public boolean validateCityInDB(String cityName) throws SQLException {
+        return false;
+    }
 }
 

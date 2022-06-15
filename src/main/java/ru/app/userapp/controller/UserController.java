@@ -36,6 +36,8 @@ public interface UserController {
     void updateByUserName(String userName) throws SQLException, IOException;
 
     void deleteUserByName(String userName) throws SQLException; // удалить юзера по имени
+    void deleteUserById(long id) throws SQLException;
 
     boolean validateUserInDB(String userName) throws SQLException;
+    boolean validateCityInDB(String cityName) throws SQLException;
 }

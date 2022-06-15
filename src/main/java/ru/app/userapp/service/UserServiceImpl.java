@@ -61,6 +61,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateByUserId(long userId) throws SQLException, IOException {
+        System.out.println("1");
         System.out.println("Press 'l' for enter city where user lived");
         System.out.println("or press 'w' for enter city where user worked");
 
@@ -68,6 +69,7 @@ public class UserServiceImpl implements UserService {
         String answer = scanner.next();
 
         if (answer.equals("l")) {
+            System.out.println("2");
             addCityWhereUserLived(userId);
         } else if (answer.equals("w")) {
             addCityWhereUserWorked(userId);
@@ -95,6 +97,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void addCityWhereUserLived(long userId) throws SQLException, IOException {
+        System.out.println("3");
         System.out.println("Enter city where user lived: ");
         System.out.println("Enter 'done' when end");
         Set<String> setCity = new HashSet<>();
@@ -105,6 +108,7 @@ public class UserServiceImpl implements UserService {
                 setCity.add(cityName);
             }
         }
+        System.out.println("4");
         udl.addCityWhereUserLived(userId, setCity);
     }
 
@@ -123,11 +127,15 @@ public class UserServiceImpl implements UserService {
         udl.addCityWhereUserWorked(userId, setCity);
     }
 
-
-
     @Override
     public void deleteUserByName(String userName) throws SQLException {
-        udl.deleteUserByName(userName);
+        long userId = udl.getUserIdByName(userName);
+        udl.deleteUser(userId);
+    }
+
+    @Override
+    public void deleteUserById(long id) throws SQLException {
+        udl.deleteUser(id);
     }
 
     @Override
@@ -135,5 +143,10 @@ public class UserServiceImpl implements UserService {
         if (getUserIdByName(userName) == 0L) {
             return false;
         } else return true;
+    }
+
+    @Override
+    public boolean validateCityInDB(String cityName) throws SQLException {
+        return false;
     }
 }

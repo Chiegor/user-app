@@ -18,6 +18,7 @@ public class ConsoleUserInterface {
             String firstCommand;
             UserControllerImpl request = new UserControllerImpl(new UserServiceImpl());
             String userName;
+            String cityName;
             String answer;
             long userId;
             while (!(firstCommand = reader.readLine()).equals("exit")) {
@@ -60,12 +61,13 @@ public class ConsoleUserInterface {
                         System.out.println("Get user id by user name");
                         System.out.println("Enter user name: ");
                         userName = reader.readLine();
-                        request.getUserIdByName(userName);
+                        userId = request.getUserIdByName(userName);
+                        System.out.println(userName + " id: " + userId);
                         break;
                     case "7":
                         System.out.println("Update user by user name or user id");
                         System.out.println("Press 'n' for update user by name");
-                        System.out.println("or 'i' for update bu user id");
+                        System.out.println("or 'i' for update by user id");
                         answer = reader.readLine();
                         if (answer.equals("n")) {
                             System.out.println("Enter user name: ");
@@ -83,17 +85,35 @@ public class ConsoleUserInterface {
 
                     case "8":
                         System.out.println("Delete user by user name or user id");
-
+                        System.out.println("Press 'n' for delete user by name");
+                        System.out.println("or 'i' for delete by user id");
+                        answer = reader.readLine();
+                        if (answer.equals("n")) {
+                            System.out.println("Enter user name: ");
+                            userName = reader.readLine();
+                            request.deleteUserByName(userName);
+                            break;
+                        } else if (answer.equals("i")) {
+                            System.out.println("Enter user id: ");
+                            userId = Long.parseLong(reader.readLine());
+                            request.deleteUserById(userId);
+                            break;
+                        } else
+                            System.out.println("Command not recognized");
                         break;
 
                     case "9":
                         System.out.println("Get all user by city lived");
-
+                        System.out.println("Enter city: ");
+                        cityName = reader.readLine();
+                        request.getAllUserByCityLived(cityName);
                         break;
 
                     case "10":
                         System.out.println("Get all user by city worked");
-
+                        System.out.println("Enter city: ");
+                        cityName = reader.readLine();
+                        request.getAllUserByCityWorked(cityName);
                         break;
 
                     default:

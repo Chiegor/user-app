@@ -20,7 +20,7 @@ public interface UserDao {
     void getAllCityWhereUserWorked(String userName) throws SQLException; // получить все города где работал юзер N
 
     Long createUser(User user) throws ApplicationException; // создать нового юзера
-    void deleteUserByName(String userName) throws SQLException; // удалить юзера по имени
+    void deleteUser(long id) throws SQLException;
 
     // эти методы вызываются из метода updateUserByName
     void addCityWhereUserLived(long userId, Set<String> cityLived) throws SQLException;
