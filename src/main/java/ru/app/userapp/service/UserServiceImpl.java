@@ -61,7 +61,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateByUserId(long userId) throws SQLException, IOException {
-        System.out.println("1");
         System.out.println("Press 'l' for enter city where user lived");
         System.out.println("or press 'w' for enter city where user worked");
 
@@ -69,7 +68,6 @@ public class UserServiceImpl implements UserService {
         String answer = scanner.next();
 
         if (answer.equals("l")) {
-            System.out.println("2");
             addCityWhereUserLived(userId);
         } else if (answer.equals("w")) {
             addCityWhereUserWorked(userId);
@@ -97,18 +95,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void addCityWhereUserLived(long userId) throws SQLException, IOException {
-        System.out.println("3");
         System.out.println("Enter city where user lived: ");
         System.out.println("Enter 'done' when end");
         Set<String> setCity = new HashSet<>();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            String cityName;
-            while (!(cityName = reader.readLine()).equals("done")) {
-                setCity.add(cityName);
-            }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String cityName;
+        while (!(cityName = reader.readLine()).equals("done")) {
+            setCity.add(cityName);
         }
-        System.out.println("4");
+
         udl.addCityWhereUserLived(userId, setCity);
     }
 
