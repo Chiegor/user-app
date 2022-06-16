@@ -1,6 +1,7 @@
 package ru.app.userapp;
 
 import ru.app.userapp.dao.UserDaoImpl;
+import ru.app.userapp.model.DBC;
 import ru.app.userapp.service.UserServiceImpl;
 import ru.app.userapp.ui.ConsoleUserInterface;
 

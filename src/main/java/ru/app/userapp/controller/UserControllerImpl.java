@@ -2,6 +2,7 @@ package ru.app.userapp.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.app.userapp.App;
 import ru.app.userapp.dao.UserDaoImpl;
 import ru.app.userapp.exception.ApplicationException;
 import ru.app.userapp.exception.ValidationException;
@@ -22,15 +23,15 @@ public class UserControllerImpl implements UserController {
     private final UserService userService;
 
     public UserControllerImpl(UserService userService) {
-        this.userService = Objects.requireNonNull(userService, "userService must be provided"); // пр-а на null NPException
+        this.userService = Objects.requireNonNull(userService, "userService must be provided");
     }
 
     @Override
-    public long createUser(String userName, Set<String> citiesLived, Set<String> citiesWorked) {
+    public long createUser(String userName, Set<String> citiesLived, Set<String> citiesWorked) throws SQLException {
         validate(userName, this::validateUserName,
                 "invalid user name length. User name length must be [1-64]");
 
-        validate(citiesLived, citiesLived1 -> validateCityLived(citiesLived1),
+        validate(citiesLived, this::validateCityLived,
                 "invalid list of cities where user lived. " +
                         "List should have at least one city, city name length must be [1-64]");
 
@@ -61,6 +62,9 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public Long getUserIdByName(String userName) throws SQLException {
+        if (!validateUserInDB(userName)) {
+            throw new ApplicationException("User not found");
+        }
         return userService.getUserIdByName(userName);
     }
 
@@ -114,6 +118,9 @@ public class UserControllerImpl implements UserController {
     public void updateByUserName(String userName) throws SQLException, IOException {
         validate(userName, this::validateUserName,
                 "invalid user name length. User name length must be [1-64]");
+        if (!validateUserInDB(userName)) {
+            throw new ApplicationException("user not found");
+        }
         userService.updateByUserName(userName);
     }
 
@@ -121,9 +128,10 @@ public class UserControllerImpl implements UserController {
     public void deleteUserByName(String userName) throws SQLException {
         validate(userName, this::validateUserName,
                 "invalid user name length. User name length must be [1-64]");
-        if (validateUserInDB(userName)) {
-            userService.deleteUserByName(userName);
+        if (!validateUserInDB(userName)) {
+            throw new ApplicationException("User not found");
         }
+        userService.deleteUserByName(userName);
     }
 
     @Override

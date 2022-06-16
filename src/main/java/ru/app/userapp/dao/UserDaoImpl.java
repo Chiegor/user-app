@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.app.userapp.PropertiesProvider;
 import ru.app.userapp.exception.ApplicationException;
+import ru.app.userapp.model.DBC;
 import ru.app.userapp.model.User;
 
 import java.sql.Connection;
@@ -32,56 +33,55 @@ public class UserDaoImpl implements UserDao {
     // #1
     @Override
     public void getAllUsers() throws SQLException {
-        String query = "select * from User order by userId";
+        String query = "select * from " + DBC.U_TABLE + " order by " + DBC.U_USER_ID;
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
-            System.out.println(resultSet.getString("userId") + " " + resultSet.getString("userName"));
+            System.out.println(resultSet.getString(DBC.U_USER_ID) + " " + resultSet.getString(DBC.U_USER_NAME));
         }
     }
 
     // #2
     @Override
     public void getAllCities() throws SQLException {
-        String query = "select * from City order by cityId";
+        String query = "select * from " + DBC.C_TABLE + " order by " + DBC.C_CITY_ID;
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
-            System.out.println(resultSet.getString("cityId") + " " + resultSet.getString("cityName"));
+            System.out.println(resultSet.getString(DBC.C_CITY_ID) + " " + resultSet.getString(DBC.C_CITY_NAME));
         }
     }
 
     // #3
     @Override
     public void getAllCityWhereUserLived(String userName) throws SQLException {
-        String query = "select distinct City.cityName " +
-                "from User " +
-                "join UCL " +
-                "on User.userId = UCL.userId " +
-                "and User.userName = '" + userName + "' " +
-                "join City " +
-                "on City.cityId = UCL.cityId";
+        String query = "select distinct " + DBC.C_CITY_NAME +
+                " from " + DBC.U_TABLE +
+                " join " + DBC.UCL_TABLE +
+                " on " + DBC.U_USER_ID + " = " + DBC.UCL_USER_ID +
+                " and " + DBC.U_USER_NAME + " = '" + userName + "'" +
+                " join " + DBC.C_TABLE +
+                " on " + DBC.C_CITY_ID + " = " + DBC.UCL_CITY_ID;
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
-
         while (resultSet.next()) {
-            System.out.println(resultSet.getString("City.cityName"));
+            System.out.println(resultSet.getString(DBC.C_CITY_NAME));
         }
     }
     // #4
     @Override
     public void getAllCityWhereUserWorked(String userName) throws SQLException {
-        String query = "select distinct City.cityName " +
-                "from User " +
-                "join UCW " +
-                "on User.userId = UCW.userId " +
-                "and User.userName = '" + userName + "' " +
-                "join City " +
-                "on City.cityId = UCW.cityId";
+        String query = "select distinct " + DBC.C_CITY_NAME +
+                " from " + DBC.U_TABLE +
+                " join " + DBC.UCW_TABLE +
+                " on " + DBC.U_USER_ID + " = " + DBC.UCW_USER_ID +
+                " and " + DBC.U_USER_NAME + " = '" + userName + "' " +
+                " join " + DBC.C_TABLE +
+                " on " + DBC.C_CITY_ID + " = " + DBC.UCW_CITY_ID;
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
-            System.out.println(resultSet.getString("City.cityName"));
+            System.out.println(resultSet.getString(DBC.C_CITY_NAME));
         }
     }
 
@@ -94,7 +94,7 @@ public class UserDaoImpl implements UserDao {
         long userId;
         
         try {
-            String query = "INSERT INTO User (userName) Values ('" + userName + "')";
+            String query = "INSERT INTO " + DBC.U_TABLE + " (" + DBC.USER_NAME + ") Values ('" + userName + "')";
             PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
             log.debug("creating new user {}", user);
@@ -115,20 +115,20 @@ public class UserDaoImpl implements UserDao {
             for (String city : cityLived) {
                 long cityId = getCityId(city);
                 if (cityId != 0L) {
-                    putCityIdUserIdInTable(userId, cityId, "UCL");
+                    putCityIdUserIdInTable(userId, cityId, DBC.UCL_TABLE);
                 } else {
                     long cityID = createCity(city);
-                    putCityIdUserIdInTable(userId, cityID, "UCL");
+                    putCityIdUserIdInTable(userId, cityID, DBC.UCL_TABLE);
                 }
             }
 
             for (String city : cityWorked) {
                 long cityId = getCityId(city);
                 if (cityId != 0L) {
-                    putCityIdUserIdInTable(userId, cityId, "UCW");
+                    putCityIdUserIdInTable(userId, cityId, DBC.UCW_TABLE);
                 } else {
                     long cityID = createCity(city);
-                    putCityIdUserIdInTable(userId, cityID, "UCW");
+                    putCityIdUserIdInTable(userId, cityID, DBC.UCW_TABLE);
                 }
             }
             System.out.println("User " + userName + " add");
@@ -142,7 +142,7 @@ public class UserDaoImpl implements UserDao {
     public Long createCity(String cityName) throws SQLException {
         long cityId;
         try {
-            String query = "insert into City (cityName) values ('" + cityName + "')";
+            String query = "insert into " + DBC.C_TABLE + " (" + DBC.CITY_NAME + ") values ('" + cityName + "')";
             PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             log.debug("creating new city {}", cityName);
 
@@ -155,7 +155,7 @@ public class UserDaoImpl implements UserDao {
                 if (generatedKeys.next()) {
                     cityId = generatedKeys.getLong(1);
                     log.debug("created city id=" + cityId);
-                    System.out.println("New city id is: " + cityId);
+                    System.out.println(cityName + " id is: " + cityId);
                 } else {
                     throw new ApplicationException("Creating city failed, no ID obtained.");
                 }
@@ -170,13 +170,12 @@ public class UserDaoImpl implements UserDao {
     public void putCityIdUserIdInTable(long userId, long cityId, String tableName) throws SQLException {
         try {
             String query = "insert into " + tableName + " (" +
-                    "userId, cityId) " +
+                    DBC.USER_ID + ", " + DBC.CITY_ID + ") " +
                     "values (" + userId + ", " + cityId + ")";
             PreparedStatement statement = connection.prepareStatement(query);
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {throw new ApplicationException("putCityIdUserIdInTable error");}
             statement.close();
-            System.out.println("Update is successful");
         } catch (SQLException e) {
             throw  new ApplicationException("ERROR put City Id User Id In Table", e);
         }
@@ -185,12 +184,12 @@ public class UserDaoImpl implements UserDao {
     @Override
     public Long getCityId(String cityName) throws SQLException {
         long id = 0L;
-        String query = "select cityId from City where cityName = '" + cityName + "'";
+        String query = "select " + DBC.CITY_ID + " from " + DBC.C_TABLE + " where " + DBC.CITY_NAME + " = '" + cityName + "'";
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
 
         while (resultSet.next()) {
-            id = resultSet.getLong("City.cityId");
+            id = resultSet.getLong(DBC.C_CITY_ID);
         }
         return id;
     }
@@ -199,12 +198,12 @@ public class UserDaoImpl implements UserDao {
     @Override
     public Long getUserIdByName(String userName) throws SQLException {
         long id = 0L;
-        String query = "select userId from User where userName = '" + userName + "'";
+        String query = "select " + DBC.USER_ID + " from " + DBC.U_TABLE + " where " + DBC.USER_NAME + " = '" + userName + "'";
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
 
         while (resultSet.next()) {
-            id = resultSet.getLong("User.userId");
+            id = resultSet.getLong(DBC.U_USER_ID);
         }
 
         if (id == 0L) {
@@ -218,39 +217,39 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void getAllUserByCityLived(String cityName) throws SQLException {
-        String query = "select distinct User.userName " +
-                "from City " +
-                "join UCL " +
-                "on City.cityId = UCL.cityId " +
-                "and City.cityName = '" + cityName + "' " +
-                "join User " +
-                "on User.userId = UCL.userId";
+        String query = "select distinct " + DBC.U_USER_NAME +
+                " from " + DBC.C_TABLE +
+                " join " + DBC.UCL_TABLE +
+                " on " + DBC.C_CITY_ID + " = " + DBC.UCL_CITY_ID +
+                " and " + DBC.C_CITY_NAME +" = '" + cityName + "' " +
+                " join " + DBC.U_TABLE +
+                " on " + DBC.U_USER_ID + " = " + DBC.UCL_USER_ID;
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
-            System.out.println(resultSet.getString("User.userName"));
+            System.out.println(resultSet.getString(DBC.U_USER_NAME));
         }
     }
 
     @Override
     public void getAllUserByCityWorked(String cityName) throws SQLException {
-        String query = "select distinct User.userName " +
-                "from City " +
-                "join UCW " +
-                "on City.cityId = UCW.cityId " +
-                "and City.cityName = '" + cityName + "' " +
-                "join User " +
-                "on User.userId = UCW.userId";
+        String query = "select distinct " + DBC.U_USER_NAME +
+                " from " + DBC.C_TABLE +
+                " join " + DBC.UCW_TABLE +
+                " on " + DBC.C_CITY_ID + " = " + DBC.UCW_CITY_ID +
+                " and " + DBC.C_CITY_NAME + " = '" + cityName + "' " +
+                " join " + DBC.U_TABLE +
+                " on " + DBC.U_USER_ID + " = " + DBC.UCW_USER_ID;
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
         while (resultSet.next()) {
-            System.out.println(resultSet.getString("User.userName"));
+            System.out.println(resultSet.getString(DBC.U_USER_NAME));
         }
     }
 
     @Override
     public void deleteUser(long id) throws SQLException {
-        String query = "delete from User where User.userId = " + id + "";
+        String query = "delete from " + DBC.U_TABLE + " where " + DBC.U_USER_ID + " = " + id + "";
         Statement statement = connection.createStatement();
         int affectedRows = statement.executeUpdate(query);
         if (affectedRows == 0) {
@@ -262,27 +261,25 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void addCityWhereUserLived(long userId, Set<String> cityLived) throws SQLException {
-        String tableName = "UCL";
         long cityId;
         for (String city : cityLived) {
             cityId = getCityId(city);
             if (cityId == 0L) {
                 cityId = createCity(city);
             }
-            putCityIdUserIdInTable(userId, cityId, tableName);
+            putCityIdUserIdInTable(userId, cityId, DBC.UCL_TABLE);
         }
     }
 
     @Override
     public void addCityWhereUserWorked(long userId, Set<String> cityWorked) throws SQLException {
-        String tableName = "UCW";
         long cityId;
         for (String city : cityWorked) {
             cityId = getCityId(city);
             if (cityId == 0L) {
                 cityId = createCity(city);
             }
-            putCityIdUserIdInTable(userId, cityId, tableName);
+            putCityIdUserIdInTable(userId, cityId, DBC.UCW_TABLE);
         }
     }
 }

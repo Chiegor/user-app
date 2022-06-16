@@ -19,7 +19,7 @@ public interface UserController {
      * @return user id
      * @throws ValidationException in case of input parameters validation failures
      */
-    long createUser(String userName, Set<String> citiesLived, Set<String> citiesWorked) throws ValidationException;
+    long createUser(String userName, Set<String> citiesLived, Set<String> citiesWorked) throws ValidationException, SQLException;
 
     void getAllUsers() throws SQLException;
     void getAllCities() throws SQLException;
