@@ -1,5 +1,11 @@
 # user-app
 
+Application architecture:
+CRUD, DAO-pattern
+
+Stack:
+JAVA, JDBC, SQL (MySQL, PostgreSQL), Maven, Java SLF4J (log), 
+
 Commands:
 
 1 - get all user from user's list
