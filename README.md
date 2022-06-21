@@ -4,7 +4,7 @@ Application architecture:
 CRUD, DAO-pattern
 
 Stack:
-JAVA, JDBC, SQL (MySQL, PostgreSQL), Maven, Java SLF4J (log), 
+JAVA, JDBC, SQL (MySQL, PostgreSQL), Maven, Java SLF4J (log);
 
 Commands:
 
