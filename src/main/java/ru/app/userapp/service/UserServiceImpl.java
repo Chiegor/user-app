@@ -15,72 +15,56 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
     UserDaoImpl udl = new UserDaoImpl();
 
-    public UserServiceImpl() throws SQLException {
+    public UserServiceImpl() {
         this.udl = Objects.requireNonNull(udl, "UserServiceImpl must be provided");
     }
 
     @Override
-    public void getAllUsers() throws SQLException {
+    public void getAllUsers() {
         udl.getAllUsers();
     }
 
     @Override
-    public void getAllCities() throws SQLException {
+    public void getAllCities() {
         udl.getAllCities();
     }
 
     @Override
-    public Long getUserIdByName(String userName) throws SQLException {
+    public Long getUserIdByName(String userName) {
         return udl.getUserIdByName(userName);
     }
 
     @Override
-    public void getAllUserByCityLived(String cityName) throws SQLException {
+    public void getAllUserByCityLived(String cityName) {
         udl.getAllUserByCityLived(cityName);
     }
 
     @Override
-    public void getAllUserByCityWorked(String cityName) throws SQLException {
+    public void getAllUserByCityWorked(String cityName) {
         udl.getAllUserByCityWorked(cityName);
     }
 
     @Override
-    public void getAllCityWhereUserLived(String userName) throws SQLException {
+    public void getAllCityWhereUserLived(String userName) {
         udl.getAllCityWhereUserLived(userName);
     }
 
     @Override
-    public void getAllCityWhereUserWorked(String userName) throws SQLException {
+    public void getAllCityWhereUserWorked(String userName) {
         udl.getAllCityWhereUserWorked(userName);
     }
 
     @Override
-    public Long createUser(User user) throws SQLException {
+    public Long createUser(User user) {
         return udl.createUser(user);
     }
 
     @Override
-    public void updateByUserId(long userId) throws SQLException, IOException {
-        System.out.println("Press 'l' for enter city where user lived");
-        System.out.println("or press 'w' for enter city where user worked");
-
-        Scanner scanner = new Scanner(System.in);
-        String answer = scanner.next();
-
-        if (answer.equals("l")) {
-            addCityWhereUserLived(userId);
-        } else if (answer.equals("w")) {
-            addCityWhereUserWorked(userId);
-        }
-    }
-
-    @Override
-    public void updateByUserName(String userName) throws SQLException, IOException {
+    public void updateByUserName(String userName) throws IOException {
 
         long userId = getUserIdByName(userName);
 
-        System.out.println("Press 'l' for enter city where user lived");
-        System.out.println("or press 'w' for enter city where user worked");
+        System.out.println("Press 'l' for update cities where user lived or 'w' for worked");
 
         Scanner scanner = new Scanner(System.in);
         String answer = scanner.next();
@@ -94,7 +78,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addCityWhereUserLived(long userId) throws SQLException, IOException {
+    public void addCityWhereUserLived(long userId) throws IOException {
         System.out.println("Enter city where user lived: ");
         System.out.println("Enter 'done' when end");
         Set<String> setCity = new HashSet<>();
@@ -108,7 +92,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addCityWhereUserWorked(long userId) throws SQLException, IOException {
+    public void addCityWhereUserWorked(long userId) throws IOException {
         System.out.println("Enter city where user worked: ");
         System.out.println("Enter 'done' when end");
         Set<String> setCity = new HashSet<>();
@@ -122,32 +106,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserByName(String userName) throws SQLException {
+    public void deleteUserByName(String userName) {
         long userId = udl.getUserIdByName(userName);
         udl.deleteUser(userId);
     }
 
     @Override
-    public void deleteUserById(long id) throws SQLException {
+    public void deleteUserById(long id) {
         udl.deleteUser(id);
-    }
-
-    // есть ли такой юзер в таблице User
-    @Override
-    public boolean validateUserInDB(String userName) throws SQLException {
-        if (getUserIdByName(userName) == 0L) {
-            return false;
-        } else return true;
-    }
-
-    // есть ли город в таблице City
-    @Override
-    public boolean validateCityInDB(String cityName) throws SQLException {
-        long cityId = udl.getCityId(cityName);
-        if (cityId == 0L) {
-            return false;
-        } else {
-            return true;
-        }
     }
 }

@@ -2,13 +2,11 @@ package ru.app.userapp.dao;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.app.userapp.PropertiesProvider;
 import ru.app.userapp.exception.ApplicationException;
-import ru.app.userapp.model.DBC;
+import ru.app.userapp.model.DBConstants;
 import ru.app.userapp.model.User;
+import ru.app.userapp.sql.PostgreSQLConnection;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,69 +17,82 @@ public class UserDaoImpl implements UserDao {
 
     private static final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
 
-    private final Connection connection;
+    PostgreSQLConnection worker;
 
-    public UserDaoImpl() throws SQLException { // прочитать properties из PV
-        String url = PropertiesProvider.getProperties().getProperty("datasource.url");
-        String username = PropertiesProvider.getProperties().getProperty("datasource.username");
-        String password = PropertiesProvider.getProperties().getProperty("datasource.password");
-
-        connection = DriverManager.getConnection(url, username, password);
-        log.info("db connection created");
-
+    public UserDaoImpl() {
+        this.worker = new PostgreSQLConnection();
     }
+
     // #1
     @Override
-    public void getAllUsers() throws SQLException {
-        String query = "select * from " + DBC.U_TABLE + " order by " + DBC.U_USER_ID;
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query);
-        while (resultSet.next()) {
-            System.out.println(resultSet.getString(DBC.U_USER_ID) + " " + resultSet.getString(DBC.U_USER_NAME));
+    public void getAllUsers() {
+        try {
+            String query = "select * from " + DBConstants.U_TABLE + " order by " + DBConstants.U_USER_NAME;
+            PreparedStatement pst = worker.getConnection().prepareStatement(query);
+            ResultSet resultSet = pst.executeQuery();
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(DBConstants.USER_NAME));
+            }
+            pst.close();
+        } catch (SQLException e) {
+            throw new ApplicationException("Get all users failed");
         }
     }
 
     // #2
     @Override
-    public void getAllCities() throws SQLException {
-        String query = "select * from " + DBC.C_TABLE + " order by " + DBC.C_CITY_ID;
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query);
-        while (resultSet.next()) {
-            System.out.println(resultSet.getString(DBC.C_CITY_ID) + " " + resultSet.getString(DBC.C_CITY_NAME));
+    public void getAllCities() {
+        try {
+            String query = "select * from " + DBConstants.C_TABLE + " order by " + DBConstants.C_CITY_ID;
+            PreparedStatement pst = worker.getConnection().prepareStatement(query);
+            ResultSet resultSet = pst.executeQuery();
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(DBConstants.CITY_NAME));
+            }
+            pst.close();
+        } catch (SQLException e) {
+            throw new ApplicationException("Get all cities failed");
         }
     }
 
     // #3
     @Override
-    public void getAllCityWhereUserLived(String userName) throws SQLException {
-        String query = "select distinct " + DBC.C_CITY_NAME +
-                " from " + DBC.U_TABLE +
-                " join " + DBC.UCL_TABLE +
-                " on " + DBC.U_USER_ID + " = " + DBC.UCL_USER_ID +
-                " and " + DBC.U_USER_NAME + " = '" + userName + "'" +
-                " join " + DBC.C_TABLE +
-                " on " + DBC.C_CITY_ID + " = " + DBC.UCL_CITY_ID;
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query);
-        while (resultSet.next()) {
-            System.out.println(resultSet.getString(DBC.C_CITY_NAME));
+    public void getAllCityWhereUserLived(String userName) {
+        try {
+            String query = "select distinct " + DBConstants.C_CITY_NAME +
+                    " from " + DBConstants.U_TABLE + ", " + DBConstants.UCL_TABLE + ", " + DBConstants.C_TABLE +
+                    " where " + DBConstants.U_USER_ID + " = " + DBConstants.UCL_USER_ID +
+                    " and " + DBConstants.C_CITY_ID + " = " + DBConstants.UCL_CITY_ID +
+                    " and " + DBConstants.U_USER_NAME + " = '" + userName + "'";
+
+            PreparedStatement statement = worker.getConnection().prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(DBConstants.CITY_NAME));
+            }
+            statement.close();
+        } catch (SQLException e) {
+            throw new ApplicationException("Get all city where user lived failed");
         }
     }
+
     // #4
     @Override
-    public void getAllCityWhereUserWorked(String userName) throws SQLException {
-        String query = "select distinct " + DBC.C_CITY_NAME +
-                " from " + DBC.U_TABLE +
-                " join " + DBC.UCW_TABLE +
-                " on " + DBC.U_USER_ID + " = " + DBC.UCW_USER_ID +
-                " and " + DBC.U_USER_NAME + " = '" + userName + "' " +
-                " join " + DBC.C_TABLE +
-                " on " + DBC.C_CITY_ID + " = " + DBC.UCW_CITY_ID;
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query);
-        while (resultSet.next()) {
-            System.out.println(resultSet.getString(DBC.C_CITY_NAME));
+    public void getAllCityWhereUserWorked(String userName) {
+        try {
+            String query = "select distinct " + DBConstants.C_CITY_NAME +
+                    " from " + DBConstants.U_TABLE + ", " + DBConstants.UCW_TABLE + ", " + DBConstants.C_TABLE +
+                    " where " + DBConstants.U_USER_ID + " = " + DBConstants.UCW_USER_ID +
+                    " and " + DBConstants.C_CITY_ID + " = " + DBConstants.UCW_CITY_ID +
+                    " and " + DBConstants.U_USER_NAME + " = '" + userName + "'";
+            PreparedStatement statement = worker.getConnection().prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(DBConstants.CITY_NAME));
+            }
+            statement.close();
+        } catch (SQLException e) {
+            throw new ApplicationException("Get all city where user worked failed");
         }
     }
 
@@ -92,15 +103,17 @@ public class UserDaoImpl implements UserDao {
         Set<String> cityLived = user.getCitiesLived();
         Set<String> cityWorked = user.getCitiesWorked();
         long userId;
-        
+
         try {
-            String query = "INSERT INTO " + DBC.U_TABLE + " (" + DBC.USER_NAME + ") Values ('" + userName + "')";
-            PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            String query = "INSERT INTO " + DBConstants.U_TABLE + " (" + DBConstants.USER_NAME + ") Values ('" + userName + "')";
+            PreparedStatement statement = worker.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
             log.debug("creating new user {}", user);
 
             int affectedRows = statement.executeUpdate();
-            if (affectedRows == 0) {throw new ApplicationException("Creating user failed, no rows affected.");}
+            if (affectedRows == 0) {
+                throw new ApplicationException("Creating user failed, no rows affected.");
+            }
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
@@ -111,39 +124,41 @@ public class UserDaoImpl implements UserDao {
                     throw new ApplicationException("Creating user failed, no ID obtained.");
                 }
             }
+            statement.close();
 
             for (String city : cityLived) {
                 long cityId = getCityId(city);
                 if (cityId != 0L) {
-                    putCityIdUserIdInTable(userId, cityId, DBC.UCL_TABLE);
+                    putCityIdUserIdInTable(userId, cityId, DBConstants.UCL_TABLE);
                 } else {
                     long cityID = createCity(city);
-                    putCityIdUserIdInTable(userId, cityID, DBC.UCL_TABLE);
+                    putCityIdUserIdInTable(userId, cityID, DBConstants.UCL_TABLE);
                 }
             }
 
             for (String city : cityWorked) {
                 long cityId = getCityId(city);
                 if (cityId != 0L) {
-                    putCityIdUserIdInTable(userId, cityId, DBC.UCW_TABLE);
+                    putCityIdUserIdInTable(userId, cityId, DBConstants.UCW_TABLE);
                 } else {
                     long cityID = createCity(city);
-                    putCityIdUserIdInTable(userId, cityID, DBC.UCW_TABLE);
+                    putCityIdUserIdInTable(userId, cityID, DBConstants.UCW_TABLE);
                 }
             }
             System.out.println("User " + userName + " add");
 
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new ApplicationException("error creating user in db", e);
         }
         return userId;
 
     }
-    public Long createCity(String cityName) throws SQLException {
+
+    public Long createCity(String cityName) {
         long cityId;
         try {
-            String query = "insert into " + DBC.C_TABLE + " (" + DBC.CITY_NAME + ") values ('" + cityName + "')";
-            PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            String query = "insert into " + DBConstants.C_TABLE + " (" + DBConstants.CITY_NAME + ") values ('" + cityName + "')";
+            PreparedStatement statement = worker.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             log.debug("creating new city {}", cityName);
 
             int affectedRows = statement.executeUpdate();
@@ -160,6 +175,7 @@ public class UserDaoImpl implements UserDao {
                     throw new ApplicationException("Creating city failed, no ID obtained.");
                 }
             }
+            statement.close();
         } catch (SQLException e) {
             throw new ApplicationException("error creating city in db", e);
         }
@@ -167,119 +183,146 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void putCityIdUserIdInTable(long userId, long cityId, String tableName) throws SQLException {
+    public void putCityIdUserIdInTable(long userId, long cityId, String tableName) {
         try {
             String query = "insert into " + tableName + " (" +
-                    DBC.USER_ID + ", " + DBC.CITY_ID + ") " +
+                    DBConstants.USER_ID + ", " + DBConstants.CITY_ID + ") " +
                     "values (" + userId + ", " + cityId + ")";
-            PreparedStatement statement = connection.prepareStatement(query);
+            PreparedStatement statement = worker.getConnection().prepareStatement(query);
             int affectedRows = statement.executeUpdate();
-            if (affectedRows == 0) {throw new ApplicationException("putCityIdUserIdInTable error");}
+            if (affectedRows == 0) {
+                throw new ApplicationException("putCityIdUserIdInTable error");
+            }
             statement.close();
         } catch (SQLException e) {
-            throw  new ApplicationException("ERROR put City Id User Id In Table", e);
+            throw new ApplicationException("ERROR put City Id User Id In Table", e);
         }
     }
 
     @Override
-    public Long getCityId(String cityName) throws SQLException {
-        long id = 0L;
-        String query = "select " + DBC.CITY_ID + " from " + DBC.C_TABLE + " where " + DBC.CITY_NAME + " = '" + cityName + "'";
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query);
+    public Long getCityId(String cityName) {
+        try {
+            long id = 0L;
+            String query = "select " + DBConstants.CITY_ID + " from " + DBConstants.C_TABLE + " where " + DBConstants.CITY_NAME + " = '" + cityName + "'";
+            Statement statement = worker.getConnection().createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
 
-        while (resultSet.next()) {
-            id = resultSet.getLong(DBC.C_CITY_ID);
+            while (resultSet.next()) {
+                id = resultSet.getLong(DBConstants.C_CITY_ID);
+            }
+            statement.close();
+            return id;
+        } catch (SQLException e) {
+            throw new ApplicationException("");
         }
-        return id;
     }
 
     // #6
     @Override
-    public Long getUserIdByName(String userName) throws SQLException {
-        long id = 0L;
-        String query = "select " + DBC.USER_ID + " from " + DBC.U_TABLE + " where " + DBC.USER_NAME + " = '" + userName + "'";
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query);
+    public Long getUserIdByName(String userName) {
+        try {
+            long id = 0L;
+            String query = "select " + DBConstants.USER_ID + " from " + DBConstants.U_TABLE + " where " + DBConstants.USER_NAME + " = '" + userName + "'";
+            Statement statement = worker.getConnection().createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
 
-        while (resultSet.next()) {
-            id = resultSet.getLong(DBC.U_USER_ID);
-        }
+            while (resultSet.next()) {
+                id = resultSet.getLong(DBConstants.U_USER_ID);
+            }
+            statement.close();
 
-        if (id == 0L) {
-            System.out.println("User " + userName + " not found ");
-            System.exit(123);
-            return null;
-        } else {
-            return id;
-        }
-    }
-
-    @Override
-    public void getAllUserByCityLived(String cityName) throws SQLException {
-        String query = "select distinct " + DBC.U_USER_NAME +
-                " from " + DBC.C_TABLE +
-                " join " + DBC.UCL_TABLE +
-                " on " + DBC.C_CITY_ID + " = " + DBC.UCL_CITY_ID +
-                " and " + DBC.C_CITY_NAME +" = '" + cityName + "' " +
-                " join " + DBC.U_TABLE +
-                " on " + DBC.U_USER_ID + " = " + DBC.UCL_USER_ID;
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query);
-        while (resultSet.next()) {
-            System.out.println(resultSet.getString(DBC.U_USER_NAME));
+            if (id == 0L) {
+                System.out.println("User " + userName + " not found ");
+                System.exit(123);
+                return null;
+            } else {
+                return id;
+            }
+        } catch (SQLException e) {
+            throw new ApplicationException("");
         }
     }
 
     @Override
-    public void getAllUserByCityWorked(String cityName) throws SQLException {
-        String query = "select distinct " + DBC.U_USER_NAME +
-                " from " + DBC.C_TABLE +
-                " join " + DBC.UCW_TABLE +
-                " on " + DBC.C_CITY_ID + " = " + DBC.UCW_CITY_ID +
-                " and " + DBC.C_CITY_NAME + " = '" + cityName + "' " +
-                " join " + DBC.U_TABLE +
-                " on " + DBC.U_USER_ID + " = " + DBC.UCW_USER_ID;
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query);
-        while (resultSet.next()) {
-            System.out.println(resultSet.getString(DBC.U_USER_NAME));
+    public void getAllUserByCityLived(String cityName) {
+        try {
+            String query = "select distinct " + DBConstants.U_USER_NAME +
+                    " from " + DBConstants.C_TABLE +
+                    " join " + DBConstants.UCL_TABLE +
+                    " on " + DBConstants.C_CITY_ID + " = " + DBConstants.UCL_CITY_ID +
+                    " and " + DBConstants.C_CITY_NAME + " = '" + cityName + "' " +
+                    " join " + DBConstants.U_TABLE +
+                    " on " + DBConstants.U_USER_ID + " = " + DBConstants.UCL_USER_ID;
+            Statement statement = worker.getConnection().createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(DBConstants.U_USER_NAME));
+            }
+            statement.close();
+        } catch (SQLException e) {
+            throw new ApplicationException("");
         }
     }
 
     @Override
-    public void deleteUser(long id) throws SQLException {
-        String query = "delete from " + DBC.U_TABLE + " where " + DBC.U_USER_ID + " = " + id + "";
-        Statement statement = connection.createStatement();
-        int affectedRows = statement.executeUpdate(query);
-        if (affectedRows == 0) {
-            throw new ApplicationException("Delete user failed, no rows affected.");
-        } else {
-            System.out.println("User deletion was successful");
+    public void getAllUserByCityWorked(String cityName) {
+        try {
+            String query = "select distinct " + DBConstants.U_USER_NAME +
+                    " from " + DBConstants.C_TABLE +
+                    " join " + DBConstants.UCW_TABLE +
+                    " on " + DBConstants.C_CITY_ID + " = " + DBConstants.UCW_CITY_ID +
+                    " and " + DBConstants.C_CITY_NAME + " = '" + cityName + "' " +
+                    " join " + DBConstants.U_TABLE +
+                    " on " + DBConstants.U_USER_ID + " = " + DBConstants.UCW_USER_ID;
+            Statement statement = worker.getConnection().createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(DBConstants.U_USER_NAME));
+            }
+            statement.close();
+        } catch (SQLException e) {
+            throw new ApplicationException("");
         }
     }
 
     @Override
-    public void addCityWhereUserLived(long userId, Set<String> cityLived) throws SQLException {
+    public void deleteUser(long id) {
+        try {
+            String query = "delete from " + DBConstants.U_TABLE + " where " + DBConstants.U_USER_ID + " = " + id + "";
+            Statement statement = worker.getConnection().createStatement();
+            int affectedRows = statement.executeUpdate(query);
+            if (affectedRows == 0) {
+                throw new ApplicationException("Delete user failed, no rows affected.");
+            } else {
+                System.out.println("User deletion was successful");
+            }
+            statement.close();
+        } catch (SQLException e) {
+            throw new ApplicationException("");
+        }
+    }
+
+    @Override
+    public void addCityWhereUserLived(long userId, Set<String> cityLived) {
         long cityId;
         for (String city : cityLived) {
             cityId = getCityId(city);
             if (cityId == 0L) {
                 cityId = createCity(city);
             }
-            putCityIdUserIdInTable(userId, cityId, DBC.UCL_TABLE);
+            putCityIdUserIdInTable(userId, cityId, DBConstants.UCL_TABLE);
         }
     }
 
     @Override
-    public void addCityWhereUserWorked(long userId, Set<String> cityWorked) throws SQLException {
+    public void addCityWhereUserWorked(long userId, Set<String> cityWorked) {
         long cityId;
         for (String city : cityWorked) {
             cityId = getCityId(city);
             if (cityId == 0L) {
                 cityId = createCity(city);
             }
-            putCityIdUserIdInTable(userId, cityId, DBC.UCW_TABLE);
+            putCityIdUserIdInTable(userId, cityId, DBConstants.UCW_TABLE);
         }
     }
 }

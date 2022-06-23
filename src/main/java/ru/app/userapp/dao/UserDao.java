@@ -3,7 +3,6 @@ package ru.app.userapp.dao;
 import ru.app.userapp.exception.ApplicationException;
 import ru.app.userapp.model.User;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Set;
 
@@ -11,12 +10,12 @@ public interface UserDao {
     void getAllUsers() throws SQLException;
     void getAllCities() throws SQLException;
 
-    Long getUserIdByName(String userName) throws SQLException;
+    Long getUserIdByName(String userName);
 
-    void getAllUserByCityLived(String cityName) throws SQLException;
-    void getAllCityWhereUserLived(String userName) throws SQLException;
+    void getAllUserByCityLived(String cityName);
+    void getAllCityWhereUserLived(String userName);
 
-    void getAllUserByCityWorked(String cityName) throws SQLException;
+    void getAllUserByCityWorked(String cityName);
     void getAllCityWhereUserWorked(String userName) throws SQLException;
 
     Long createUser(User user) throws ApplicationException;

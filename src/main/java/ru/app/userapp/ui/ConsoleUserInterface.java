@@ -65,24 +65,11 @@ public class ConsoleUserInterface {
                         System.out.println(userName + " id: " + userId);
                         break;
                     case "7":
-                        System.out.println("Update user by user name or user id");
-                        System.out.println("Press 'n' for update user by name");
-                        System.out.println("or 'i' for update by user id");
-                        answer = reader.readLine();
-                        if (answer.equals("n")) {
-                            System.out.println("Enter user name: ");
-                            userName = reader.readLine();
-                            request.updateByUserName(userName);
-                            break;
-                        } else if (answer.equals("i")) {
-                            System.out.println("Enter user id: ");
-                            userId = Long.parseLong(reader.readLine());
-                            request.updateByUserId(userId);
-                            break;
-                        } else
-                            System.out.println("Command not recognized");
+                        System.out.println("Update user info");
+                        System.out.println("Enter user name: ");
+                        userName = reader.readLine();
+                        request.updateByUserName(userName);
                         break;
-
                     case "8":
                         System.out.println("Delete user by user name or user id");
                         System.out.println("Press 'n' for delete user by name");
@@ -146,7 +133,7 @@ public class ConsoleUserInterface {
                 set.add(city);
             }
             return set;
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new ApplicationException("error addCityToSet", e);
         }
     }
