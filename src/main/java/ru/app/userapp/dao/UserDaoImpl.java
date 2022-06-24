@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.app.userapp.exception.ApplicationException;
 import ru.app.userapp.model.DBConstants;
 import ru.app.userapp.model.User;
-import ru.app.userapp.sql.PostgreSQLConnection;
+import ru.app.userapp.sql.SQLConnection;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,10 +17,10 @@ public class UserDaoImpl implements UserDao {
 
     private static final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
 
-    PostgreSQLConnection worker;
+    SQLConnection worker;
 
     public UserDaoImpl() {
-        this.worker = new PostgreSQLConnection();
+        this.worker = new SQLConnection();
     }
 
     // #1
@@ -151,7 +151,6 @@ public class UserDaoImpl implements UserDao {
             throw new ApplicationException("error creating user in db", e);
         }
         return userId;
-
     }
 
     public Long createCity(String cityName) {
@@ -203,17 +202,18 @@ public class UserDaoImpl implements UserDao {
     public Long getCityId(String cityName) {
         try {
             long id = 0L;
-            String query = "select " + DBConstants.CITY_ID + " from " + DBConstants.C_TABLE + " where " + DBConstants.CITY_NAME + " = '" + cityName + "'";
-            Statement statement = worker.getConnection().createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
-
+            String query = "select " + DBConstants.CITY_ID +
+                    " from " + DBConstants.C_TABLE +
+                    " where " + DBConstants.CITY_NAME + " = '" + cityName + "'";
+            PreparedStatement statement = worker.getConnection().prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                id = resultSet.getLong(DBConstants.C_CITY_ID);
+                id = resultSet.getLong(DBConstants.CITY_ID);
             }
             statement.close();
             return id;
         } catch (SQLException e) {
-            throw new ApplicationException("");
+            throw new ApplicationException("Get city id failed");
         }
     }
 
@@ -222,12 +222,15 @@ public class UserDaoImpl implements UserDao {
     public Long getUserIdByName(String userName) {
         try {
             long id = 0L;
-            String query = "select " + DBConstants.USER_ID + " from " + DBConstants.U_TABLE + " where " + DBConstants.USER_NAME + " = '" + userName + "'";
-            Statement statement = worker.getConnection().createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+            String query = "select " + DBConstants.USER_ID +
+                    " from " + DBConstants.U_TABLE +
+                    " where " + DBConstants.USER_NAME +
+                    " = '" + userName + "'";
+            PreparedStatement statement = worker.getConnection().prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                id = resultSet.getLong(DBConstants.U_USER_ID);
+                id = resultSet.getLong(DBConstants.USER_ID);
             }
             statement.close();
 
@@ -246,17 +249,16 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void getAllUserByCityLived(String cityName) {
         try {
-            String query = "select distinct " + DBConstants.U_USER_NAME +
-                    " from " + DBConstants.C_TABLE +
-                    " join " + DBConstants.UCL_TABLE +
-                    " on " + DBConstants.C_CITY_ID + " = " + DBConstants.UCL_CITY_ID +
-                    " and " + DBConstants.C_CITY_NAME + " = '" + cityName + "' " +
-                    " join " + DBConstants.U_TABLE +
-                    " on " + DBConstants.U_USER_ID + " = " + DBConstants.UCL_USER_ID;
-            Statement statement = worker.getConnection().createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+            String query = "select distinct " + DBConstants.USER_NAME + ", " + DBConstants.CITY_NAME +
+                    " from " + DBConstants.U_TABLE + ", " + DBConstants.C_TABLE + ", " + DBConstants.UCL_TABLE +
+                    " where " + DBConstants.U_USER_ID + " = " + DBConstants.UCL_USER_ID +
+                    " and " + DBConstants.C_CITY_ID + " = " + DBConstants.UCL_CITY_ID +
+                    " and " + DBConstants.C_CITY_NAME + " = '" + cityName + "'";
+
+            PreparedStatement statement = worker.getConnection().prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                System.out.println(resultSet.getString(DBConstants.U_USER_NAME));
+                System.out.println(resultSet.getString(DBConstants.USER_NAME));
             }
             statement.close();
         } catch (SQLException e) {
@@ -267,17 +269,15 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void getAllUserByCityWorked(String cityName) {
         try {
-            String query = "select distinct " + DBConstants.U_USER_NAME +
-                    " from " + DBConstants.C_TABLE +
-                    " join " + DBConstants.UCW_TABLE +
-                    " on " + DBConstants.C_CITY_ID + " = " + DBConstants.UCW_CITY_ID +
-                    " and " + DBConstants.C_CITY_NAME + " = '" + cityName + "' " +
-                    " join " + DBConstants.U_TABLE +
-                    " on " + DBConstants.U_USER_ID + " = " + DBConstants.UCW_USER_ID;
-            Statement statement = worker.getConnection().createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+            String query = "select distinct " + DBConstants.USER_NAME + ", " + DBConstants.CITY_NAME +
+                    " from " + DBConstants.U_TABLE + ", " + DBConstants.C_TABLE + ", " + DBConstants.UCW_TABLE +
+                    " where " + DBConstants.U_USER_ID + " = " + DBConstants.UCW_USER_ID +
+                    " and " + DBConstants.C_CITY_ID + " = " + DBConstants.UCW_CITY_ID +
+                    " and " + DBConstants.C_CITY_NAME + " = '" + cityName + "'";
+            PreparedStatement statement = worker.getConnection().prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                System.out.println(resultSet.getString(DBConstants.U_USER_NAME));
+                System.out.println(resultSet.getString(DBConstants.USER_NAME));
             }
             statement.close();
         } catch (SQLException e) {
@@ -288,9 +288,12 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void deleteUser(long id) {
         try {
-            String query = "delete from " + DBConstants.U_TABLE + " where " + DBConstants.U_USER_ID + " = " + id + "";
-            Statement statement = worker.getConnection().createStatement();
-            int affectedRows = statement.executeUpdate(query);
+            String query = "delete from " + DBConstants.U_TABLE +
+                    " where " + DBConstants.USER_ID +
+                    " = " + id + "";
+
+            PreparedStatement statement = worker.getConnection().prepareStatement(query);
+            int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
                 throw new ApplicationException("Delete user failed, no rows affected.");
             } else {
@@ -298,7 +301,7 @@ public class UserDaoImpl implements UserDao {
             }
             statement.close();
         } catch (SQLException e) {
-            throw new ApplicationException("");
+            throw new ApplicationException("Delete user failed");
         }
     }
 

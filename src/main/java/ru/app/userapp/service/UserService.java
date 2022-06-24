@@ -3,7 +3,6 @@ package ru.app.userapp.service;
 import ru.app.userapp.model.User;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 public interface UserService {
     void getAllUsers();
@@ -18,8 +17,7 @@ public interface UserService {
     void getAllCityWhereUserWorked(String userName);
 
     Long createUser(User user);
-    void deleteUserByName(String userName);
-    void deleteUserById(long id);
+    void deleteUser(String userName);
 
     void updateByUserName(String userName) throws IOException;
 

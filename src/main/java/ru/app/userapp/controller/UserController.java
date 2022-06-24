@@ -3,7 +3,6 @@ package ru.app.userapp.controller;
 import ru.app.userapp.exception.ValidationException;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Set;
 
 public interface UserController {
@@ -32,6 +31,5 @@ public interface UserController {
 
     void updateByUserName(String userName) throws IOException;
 
-    void deleteUserByName(String userName);
-    void deleteUserById(long id);
+    void deleteUser(String userName);
 }

@@ -7,19 +7,17 @@ import ru.app.userapp.service.UserServiceImpl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ConsoleUserInterface {
-    public void start() throws SQLException {
+    public void start() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             System.out.println("Hello! Press 'h' to get list of command");
             String firstCommand;
             UserControllerImpl request = new UserControllerImpl(new UserServiceImpl());
             String userName;
             String cityName;
-            String answer;
             long userId;
             while (!(firstCommand = reader.readLine()).equals("exit")) {
                 switch (firstCommand) {
@@ -49,13 +47,16 @@ public class ConsoleUserInterface {
                         userName = reader.readLine();
 
                         System.out.println("Enter city name where user lived: ");
+                        System.out.println("enter 'done' when finish");
                         Set<String> cityLivedSet;
                         cityLivedSet = addCityToSet();
 
                         System.out.println("Enter city name where user worked: ");
+                        System.out.println("enter 'done' when finish");
                         Set<String> cityWorkedSet;
                         cityWorkedSet = addCityToSet();
-                        request.createUser(userName, cityLivedSet, cityWorkedSet);
+                        userId = request.createUser(userName, cityLivedSet, cityWorkedSet);
+                        System.out.println(userName + " id is: " + userId);
                         break;
                     case "6":
                         System.out.println("Get user id by user name");
@@ -71,22 +72,10 @@ public class ConsoleUserInterface {
                         request.updateByUserName(userName);
                         break;
                     case "8":
-                        System.out.println("Delete user by user name or user id");
-                        System.out.println("Press 'n' for delete user by name");
-                        System.out.println("or 'i' for delete by user id");
-                        answer = reader.readLine();
-                        if (answer.equals("n")) {
-                            System.out.println("Enter user name: ");
-                            userName = reader.readLine();
-                            request.deleteUserByName(userName);
-                            break;
-                        } else if (answer.equals("i")) {
-                            System.out.println("Enter user id: ");
-                            userId = Long.parseLong(reader.readLine());
-                            request.deleteUserById(userId);
-                            break;
-                        } else
-                            System.out.println("Command not recognized");
+                        System.out.println("Delete user by user name");
+                        System.out.println("Enter user name: ");
+                        userName = reader.readLine();
+                        request.deleteUser(userName);
                         break;
 
                     case "9":
@@ -103,8 +92,7 @@ public class ConsoleUserInterface {
                         request.getAllUserByCityWorked(cityName);
                         break;
 
-                    default:
-                        System.out.println("Unknown command" + "\n");
+                    case "h":
                         System.out.println("1 - get all user from user's list");
                         System.out.println("2 - get all city from city's list");
                         System.out.println("3 - get all city where user lived");
@@ -116,6 +104,9 @@ public class ConsoleUserInterface {
                         System.out.println("9 - get all user by city lived");
                         System.out.println("10 - get all user by city worked");
                         System.out.println("h - help - get list of command");
+                    default:
+                        System.out.println("Unknown command" + "\n");
+                        System.out.println("Press 'h' to get a list of commands");
                         break;
                 }
             }

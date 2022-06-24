@@ -12,13 +12,13 @@ public class DBConstants {
 
     // fields in USER_TABLE
     public static final String USER_ID = "user_id"; // PK, AI, NN
-    public static final String USER_NAME = "user_name"; // NN <65>
+    public static final String USER_NAME = "user_name"; // NN <65> // DBConstants.USER_NAME
     // full name USER_TABLE fields
     public static final String U_USER_ID = "users.user_id"; // DBConstants.U_USER_ID
     public static final String U_USER_NAME = "users.user_name"; // DBConstants.U_USER_NAME
 
     // fields in CITIES_TABLE
-    public static final String CITY_ID = "city_id"; // PK, AI, NN
+    public static final String CITY_ID = "city_id"; // PK, AI, NN // DBConstants.CITY_ID
     public static final String CITY_NAME = "city_name"; // NN <65>  DBConstants.CITY_NAME
     // full name CITIES_TABLE fields
     public static final String C_CITY_ID = "cities.city_id"; // DBConstants.C_CITY_ID

@@ -6,7 +6,6 @@ import ru.app.userapp.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Scanner;
@@ -106,13 +105,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserByName(String userName) {
+    public void deleteUser(String userName) {
         long userId = udl.getUserIdByName(userName);
         udl.deleteUser(userId);
     }
 
-    @Override
-    public void deleteUserById(long id) {
-        udl.deleteUser(id);
-    }
 }

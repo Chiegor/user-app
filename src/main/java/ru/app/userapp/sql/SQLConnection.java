@@ -10,13 +10,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class PostgreSQLConnection {
+public class SQLConnection {
 
     private static final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
 
     private final Connection connection;
 
-    public PostgreSQLConnection() {
+    public SQLConnection() {
         try {
             String url = PropertiesProvider.getProperties().getProperty("datasource.url");
             String username = PropertiesProvider.getProperties().getProperty("datasource.username");

@@ -94,25 +94,20 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public void deleteUserByName(String userName) {
+    public void deleteUser(String userName) {
         validate(userName, this::validateUserName,
                 "invalid user name length. User name length must be [1-64]");
-        userService.deleteUserByName(userName);
-    }
-
-    @Override
-    public void deleteUserById(long id) {
-        userService.deleteUserById(id);
-    }
-
-    private boolean validateCityName(String cityName) {
-        return cityName != null && cityName.length() >= User.MIN_CITY_NAME_LENGTH
-                && cityName.length() <= User.MAX_CITY_NAME_LENGTH;
+        userService.deleteUser(userName);
     }
 
     private boolean validateUserName(String userName) {
         return userName != null && userName.length() >= User.MIN_USER_NAME_LENGTH
                 && userName.length() <= User.MAX_USER_NAME_LENGTH;
+    }
+
+    private boolean validateCityName(String cityName) {
+        return cityName != null && cityName.length() >= User.MIN_CITY_NAME_LENGTH
+                && cityName.length() <= User.MAX_CITY_NAME_LENGTH;
     }
 
     private boolean validateCityLived(Set<String> citiesLived) {
