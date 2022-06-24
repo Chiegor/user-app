@@ -16,7 +16,6 @@ User-app allows to store various information about users.
 4. it should be possible to see all users who worked in city X
 5. it should be possible to see all users who lived in city X
 
-
 Commands:
 
 1 - get all user from user's list
