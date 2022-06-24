@@ -6,6 +6,16 @@ CRUD, DAO-pattern
 Stack:
 JAVA, JDBC, SQL (MySQL, PostgreSQL), Maven, Java SLF4J (log);
 
+User-app allows to store various information about users.
+
+1. The application must allow CRUD operation, each user is unique
+
+2. each user can have 0..* the city where he worked
+3. each user can have 1..* cities where he lived
+
+4. it should be possible to see all users who worked in city X
+5. it should be possible to see all users who lived in city X
+
 Commands:
 
 1 - get all user from user's list
@@ -24,29 +34,24 @@ SQL
 
 SCHEMAS
 
-User:
--userId
--userName
+users:
+-user_id
+-user_name
 
-City:
--cityId
--cityName
+cities:
+-city_id
+-city_name
 
-UCL: // where users lived
+users_cities_lived
 -n
--userId
--cityId
+-user_id
+-city_id
 
-UCW: // where users worked
+users_cities_worked
 -n
--userId
--cityId
+-user_id
+-city_id
 
-User.userId == UCL.userId
-City.cityId == UCL.cityId
-
-User.userId == UCW.userId
-City.cityId == UCW.cityId
 
 
 
