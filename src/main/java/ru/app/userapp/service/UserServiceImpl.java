@@ -1,5 +1,7 @@
 package ru.app.userapp.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.app.userapp.dao.UserDaoImpl;
 import ru.app.userapp.model.User;
 
@@ -12,6 +14,9 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class UserServiceImpl implements UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
     UserDaoImpl udl = new UserDaoImpl();
 
     public UserServiceImpl() {
@@ -60,11 +65,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateByUserName(String userName) throws IOException {
-
         long userId = getUserIdByName(userName);
-
         System.out.println("Press 'l' for update cities where user lived or 'w' for worked");
-
         Scanner scanner = new Scanner(System.in);
         String answer = scanner.next();
 
