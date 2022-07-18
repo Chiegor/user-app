@@ -17,6 +17,8 @@ public class UserDaoImpl implements UserDao {
 
     private static final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
 
+    DBConstants constants;
+
     SQLConnection worker;
 
     public UserDaoImpl() {

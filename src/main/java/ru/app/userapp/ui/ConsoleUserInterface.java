@@ -14,12 +14,12 @@ public class ConsoleUserInterface {
     public void start() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             System.out.println("Hello! Press 'h' to get list of command");
-            String firstCommand;
+            String firstCommand = "";
             UserControllerImpl request = new UserControllerImpl(new UserServiceImpl());
             String userName;
             String cityName;
             long userId;
-            while (!(firstCommand = reader.readLine()).equals("exit")) {
+            while (!(firstCommand = reader.readLine()).equals("")) {
                 switch (firstCommand) {
                     case "1":
                         System.out.println("Get all user from DB");
